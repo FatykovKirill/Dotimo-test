@@ -36,6 +36,12 @@ body {
 .block {
   width: 80px;
   height: 80px;
+  position: absolute;
+}
+
+#block-1.block-active,
+#block-2.block-active {
+  border-style: dashed;
 }
 
 #block-1 {
