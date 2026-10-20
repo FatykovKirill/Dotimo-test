@@ -1,13 +1,14 @@
 export function dragAndDrop(block: HTMLElement,
 	initialX: number = 0,
 	initialY: number = 0,
+	onSelect: (block: HTMLElement) => void,
 ) {
 	let active: boolean = false;
 	// Click position
 	let startX: number = 0,
 		startY: number = 0;
 
-	// Position cube
+	// Position block
 	let currentX: number = initialX,
 		currentY: number = initialY;
 
@@ -25,7 +26,7 @@ export function dragAndDrop(block: HTMLElement,
 		startY = e.clientY;
 
 		active = true;
-		block.classList.add('block-active');
+		onSelect(block);
 	});
 
 	block.addEventListener('pointermove', (e) => {
@@ -36,8 +37,8 @@ export function dragAndDrop(block: HTMLElement,
 
 		// Work place size
 		const BOARD_SIZE = 800;
-		const CUBE_SIZE = 100;
-		const MAX_POS = BOARD_SIZE - CUBE_SIZE;
+		const BLOCK_SIZE = 100;
+		const MAX_POS = BOARD_SIZE - BLOCK_SIZE;
 
 		// Formule limit zone
 		offsetX = Math.max(0, Math.min(offsetX, MAX_POS));
@@ -53,7 +54,6 @@ export function dragAndDrop(block: HTMLElement,
 		currentY = offsetY;
 
 		active = false;
-		block.classList.remove('block-active');
 	}
 
 	block.addEventListener('pointerup', stopDragging);

@@ -2,12 +2,48 @@ import './style.css'
 
 import { dragAndDrop } from './drag-and-drop';
 
+let activeBox: HTMLElement | null = null;
+
 document.getElementById('app')!.innerHTML = `
 <div class="work-zone">
-<div class="block" id="block-1"></div>
-<div class="block" id="block-2"></div>
+	<div class="block" id="block-1" data-color="color-1"></div>
+	<div class="block" id="block-2" data-color="color-2"></div>
+
+	<div class="choose-color">
+	<h2>Выбери цвет</h2>
+		<div class="choose-color__items">
+			<div class="choose-color__item" data-color="color-1"></div>
+			<div class="choose-color__item" data-color="color-2"></div>
+			<div class="choose-color__item" data-color="color-3"></div>
+		</div>
+
+	</div>
+
 </div>
 `;
 
-dragAndDrop(document.getElementById('block-1')!, 150, 300);
-dragAndDrop(document.getElementById('block-2')!, 550, 300);
+function clearActiveBox(): void {
+	document.querySelectorAll('.block').forEach(e => e.classList.remove('block-active'));
+	activeBox = null;
+}
+export function setActiveBox(block: HTMLElement) {
+	clearActiveBox()
+
+	block.classList.add('block-active');
+
+	activeBox = block;
+};
+
+const board = document.querySelector<HTMLElement>('.work-zone');
+
+board?.addEventListener('click', (e: MouseEvent) => {
+
+	const target = e.target as HTMLElement;
+
+
+	if (target === board) {
+		clearActiveBox();
+	}
+});
+dragAndDrop(document.getElementById('block-1')!, 150, 300, setActiveBox);
+dragAndDrop(document.getElementById('block-2')!, 550, 300, setActiveBox);
