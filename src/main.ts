@@ -11,10 +11,10 @@ document.getElementById('app')!.innerHTML = `
 
 	<div class="choose-color">
 	<h2>Выбери цвет</h2>
-		<div class="choose-color__items">
-			<div class="choose-color__item" data-color="color-1"></div>
-			<div class="choose-color__item" data-color="color-2"></div>
-			<div class="choose-color__item" data-color="color-3"></div>
+		<div class="choose-color__items" id="colorPalette">
+			<div class="color-btn" data-color="color-1"></div>
+			<div class="color-btn" data-color="color-2"></div>
+			<div class="color-btn" data-color="color-3"></div>
 		</div>
 
 	</div>
@@ -32,11 +32,12 @@ export function setActiveBox(block: HTMLElement) {
 	block.classList.add('block-active');
 
 	activeBox = block;
+
 };
 
 const board = document.querySelector<HTMLElement>('.work-zone');
 
-board?.addEventListener('click', (e: MouseEvent) => {
+board?.addEventListener('click', (e) => {
 
 	const target = e.target as HTMLElement;
 
@@ -45,5 +46,21 @@ board?.addEventListener('click', (e: MouseEvent) => {
 		clearActiveBox();
 	}
 });
+
+const palette = document.getElementById('colorPalette');
+
+palette?.addEventListener('click', (e) => {
+	const target = e.target as HTMLElement;
+
+	if (target.classList.contains('color-btn')) {
+		const selectedColor = target.dataset.color;
+
+
+		if (activeBox && selectedColor) {
+			activeBox.dataset.color = selectedColor;
+		}
+	}
+});
+
 dragAndDrop(document.getElementById('block-1')!, 150, 300, setActiveBox);
 dragAndDrop(document.getElementById('block-2')!, 550, 300, setActiveBox);
