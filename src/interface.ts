@@ -1,3 +1,8 @@
 export interface BlockData {
-	x: number, y: number, size: number
+	id: string;
+	element: HTMLElement;
+	x: number;
+	y: number;
+	size: number;
+	groupId: string | null;
 }

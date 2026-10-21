@@ -57,8 +57,23 @@ palette?.addEventListener('click', (e) => {
 const block1El = document.getElementById('block-1')!;
 const block2El = document.getElementById('block-2')!;
 
-const block1Data: BlockData = { x: 100, y: 100, size: 100 };
-const block2Data: BlockData = { x: 300, y: 100, size: 100 };
+export const block1Data: BlockData = {
+	id: 'block-1',
+	element: block1El,
+	x: 100,
+	y: 100,
+	size: 100,
+	groupId: null
+};
 
-dragAndDrop(block1El, block1Data, setActiveBox, () => block2Data);
-dragAndDrop(block2El, block2Data, setActiveBox, () => block1Data);
+export const block2Data: BlockData = {
+	id: 'block-2',
+	element: block2El,
+	x: 300,
+	y: 100,
+	size: 100,
+	groupId: null
+};
+
+dragAndDrop(block1Data, setActiveBox, () => block2Data);
+dragAndDrop(block2Data, setActiveBox, () => block1Data);

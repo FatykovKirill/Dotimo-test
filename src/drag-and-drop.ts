@@ -1,83 +1,81 @@
 import type { BlockData } from "./interface";
 
 export function dragAndDrop(
-	block: HTMLElement,
 	blockData: BlockData,
 	onSelect: (block: HTMLElement) => void,
 	getOtherBlockData: () => BlockData
 ) {
 	let active: boolean = false;
 
-	let startX: number = 0,
-		startY: number = 0;
+	let lastMouseX: number = 0;
+	let lastMouseY: number = 0;
 
+	const { element } = blockData;
 
-	let currentX: number = blockData.x,
-		currentY: number = blockData.y;
+	element.style.transform = `translate3d(${blockData.x}px, ${blockData.y}px, 0)`;
 
-	let offsetX: number = blockData.x,
-		offsetY: number = blockData.y;
+	element.addEventListener('pointerdown', (e) => {
+		element.setPointerCapture(e.pointerId);
 
-	block.style.transform = `translate3d(${offsetX}px, ${offsetY}px, 0)`;
-
-	block.addEventListener('pointerdown', (e) => {
-		block.setPointerCapture(e.pointerId);
-
-		startX = e.clientX;
-		startY = e.clientY;
+		lastMouseX = e.clientX;
+		lastMouseY = e.clientY;
 
 		active = true;
-		onSelect(block);
+		onSelect(element);
 	});
 
-	block.addEventListener('pointermove', (e) => {
+	element.addEventListener('pointermove', (e) => {
 		if (!active) return;
 
-		offsetX = (e.clientX - startX) + currentX;
-		offsetY = (e.clientY - startY) + currentY;
-
-		const BOARD_SIZE = 800;
-		const BLOCK_SIZE = blockData.size ?? 100;
-		const MAX_POS = BOARD_SIZE - BLOCK_SIZE;
+		const dx = e.clientX - lastMouseX;
+		const dy = e.clientY - lastMouseY;
 
 
-		offsetX = Math.max(0, Math.min(offsetX, MAX_POS));
-		offsetY = Math.max(0, Math.min(offsetY, MAX_POS));
+		lastMouseX = e.clientX;
+		lastMouseY = e.clientY;
 
-		const boxA: BlockData = { x: offsetX, y: offsetY, size: BLOCK_SIZE };
-		const boxB: BlockData = getOtherBlockData();
+		const otherBlock = getOtherBlockData();
 
-		const snappedCoords = checkSnap(boxA, boxB);
+		if (blockData.groupId && blockData.groupId === otherBlock.groupId) {
+			moveBlock(blockData, dx, dy);
+			moveBlock(otherBlock, dx, dy);
+			return;
+		}
 
-		offsetX = snappedCoords.x;
-		offsetY = snappedCoords.y;
+		moveBlock(blockData, dx, dy);
 
-		blockData.x = offsetX;
-		blockData.y = offsetY;
+		const snappedCoords = checkSnap(blockData, otherBlock);
 
-		block.style.transform = `translate3d(${offsetX}px, ${offsetY}px, 0)`;
+		blockData.x = snappedCoords.x;
+		blockData.y = snappedCoords.y;
+		element.style.transform = `translate3d(${blockData.x}px, ${blockData.y}px, 0)`;
 	});
 
-	function stopDragging() {
+	function stopDragging(e: PointerEvent) {
 		if (!active) return;
-
-		currentX = offsetX;
-		currentY = offsetY;
-
-		blockData.x = currentX;
-		blockData.y = currentY;
-
 		active = false;
+		element.releasePointerCapture(e.pointerId);
 	}
 
-	block.addEventListener('pointerup', stopDragging);
-	block.addEventListener('pointercancel', stopDragging);
+	element.addEventListener('pointerup', stopDragging);
+	element.addEventListener('pointercancel', stopDragging);
 }
 
-function checkSnap(
-	boxA: BlockData,
-	boxB: BlockData
-) {
+function moveBlock(block: BlockData, dx: number, dy: number) {
+	const BOARD_SIZE = 800;
+	const BLOCK_SIZE = block.size ?? 100;
+	const MAX_POS = BOARD_SIZE - BLOCK_SIZE;
+
+	let newX = block.x + dx;
+	let newY = block.y + dy;
+
+	block.x = Math.max(0, Math.min(newX, MAX_POS));
+	block.y = Math.max(0, Math.min(newY, MAX_POS));
+
+	block.element.style.transform = `translate3d(${block.x}px, ${block.y}px, 0)`;
+}
+
+function checkSnap(boxA: BlockData, boxB: BlockData) {
 	const SNAP_THRESHOLD = 20;
 
 	const sizeA = boxA.size ?? 100;
@@ -86,29 +84,35 @@ function checkSnap(
 	const isOverlapY = boxA.y + sizeA > boxB.y && boxA.y < boxB.y + sizeB;
 	const isOverlapX = boxA.x + sizeA > boxB.x && boxA.x < boxB.x + sizeB;
 
+	let snappedX = boxA.x;
+	let snappedY = boxA.y;
+	let isSnapped = false;
+
 	if (isOverlapY) {
 		if (Math.abs(boxA.x - (boxB.x + sizeB)) <= SNAP_THRESHOLD) {
-			console.log('Прилипли СПРАВА');
-			return { x: boxB.x + sizeB, y: boxA.y };
-		}
-
-		if (Math.abs((boxA.x + sizeA) - boxB.x) <= SNAP_THRESHOLD) {
-			console.log('Прилипли СЛЕВА');
-			return { x: boxB.x - sizeA, y: boxA.y };
+			snappedX = boxB.x + sizeB;
+			isSnapped = true;
+		} else if (Math.abs((boxA.x + sizeA) - boxB.x) <= SNAP_THRESHOLD) {
+			snappedX = boxB.x - sizeA;
+			isSnapped = true;
 		}
 	}
 
 	if (isOverlapX) {
 		if (Math.abs(boxA.y - (boxB.y + sizeB)) <= SNAP_THRESHOLD) {
-			console.log('Прилипли СНИЗУ');
-			return { x: boxA.x, y: boxB.y + sizeB };
-		}
-
-		if (Math.abs((boxA.y + sizeA) - boxB.y) <= SNAP_THRESHOLD) {
-			console.log('Прилипли СВЕРХУ');
-			return { x: boxA.x, y: boxB.y - sizeA };
+			snappedY = boxB.y + sizeB;
+			isSnapped = true;
+		} else if (Math.abs((boxA.y + sizeA) - boxB.y) <= SNAP_THRESHOLD) {
+			snappedY = boxB.y - sizeA;
+			isSnapped = true;
 		}
 	}
 
-	return { x: boxA.x, y: boxA.y };
+	if (isSnapped) {
+		const sharedGroupId = boxB.groupId || boxA.groupId || `group_${Date.now()}`;
+		boxA.groupId = sharedGroupId;
+		boxB.groupId = sharedGroupId;
+	}
+
+	return { x: snappedX, y: snappedY };
 }
