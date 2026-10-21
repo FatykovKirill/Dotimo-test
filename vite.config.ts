@@ -2,5 +2,5 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
 
-	base: '/cube-configurator/',
+	base: '/https://github.com/FatykovKirill/Dotimo-test/',
 });
