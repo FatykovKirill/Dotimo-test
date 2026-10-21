@@ -1,9 +1,9 @@
 ```bash
 # 1. Клонировать репозиторий
-git clone [https://github.com/FatykovKirill/Dotimo-test](https://github.com/FatykovKirill/Dotimo-test)
+git clone https://github.com/FatykovKirill/Dotimo-test.git
 
 # 2. Перейти в папку проекта
-cd cube-configurator
+cd Dotimo-test
 
 # 3. Установить зависимости
 npm install
