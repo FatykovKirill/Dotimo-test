@@ -85,3 +85,19 @@ body {
   background-color: var(--orange-color);
   border: 1px solid var(--orange-border-color)
 }
+
+.unbind-btn {
+  margin-top: 15px;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 6px;
+  background-color: #7c4dff;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.unbind-btn:hover {
+  opacity: 0.85;
+}
